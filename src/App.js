@@ -9,6 +9,7 @@ import ImageLinkForm from './components/ImageLinkForm/ImageLinkForm';
 import Rank from './components/Rank/Rank';
 import Particles from 'react-tsparticles';
 import Modal from './components/Modal/Modal';
+import Profile from './components/Profile/Profile';
 
 const initialState = {
   input: '',
@@ -16,6 +17,7 @@ const initialState = {
   box: {},
   route: 'home',
   isSignedIn: true,
+  isProfileOpen: true,
   user: {
     id: '',
     name: '',
@@ -80,7 +82,8 @@ class App extends Component {
       .then((response) => response.json())
       .then((response) => {
         if (response) {
-          fetch('https://afternoon-island-00813.herokuapp.com/image', {
+          // fetch('https://afternoon-island-00813.herokuapp.com/image', {
+          fetch('http://localhost:3000/image', {
             method: 'put',
             headers: {
               'Content-Type': 'application/json',
@@ -109,6 +112,13 @@ class App extends Component {
     this.setState({ route: route });
   };
 
+  toggleModal = () => {
+    this.setState((prevState) => ({
+      ...prevState,
+      isProfileOpen: !prevState.isProfileOpen,
+    }));
+  };
+
   render() {
     const particlesInit = (main) => {
       // you can initialize the tsParticles instance (main) here, adding custom shapes or presets
@@ -116,7 +126,7 @@ class App extends Component {
 
     const particlesLoaded = (container) => {};
 
-    const { imageUrl, box, route, isSignedIn } = this.state;
+    const { imageUrl, box, route, isSignedIn, isProfileOpen } = this.state;
 
     return (
       <div className='App'>
@@ -206,7 +216,16 @@ class App extends Component {
         <Navigation
           onRouteChange={this.onRouteChange}
           isSignedIn={isSignedIn}
+          toggleModal={this.toggleModal}
         />
+        {this.state.isProfileOpen && (
+          <Modal>
+            <Profile
+              isProfileOpen={isProfileOpen}
+              toggleModal={this.toggleModal}
+            />
+          </Modal>
+        )}
         {route === 'home' ? (
           <div>
             <Logo />
