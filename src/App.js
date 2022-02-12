@@ -8,6 +8,7 @@ import Logo from './components/Logo/Logo';
 import ImageLinkForm from './components/ImageLinkForm/ImageLinkForm';
 import Rank from './components/Rank/Rank';
 import Particles from 'react-tsparticles';
+import Modal from './components/Modal/Modal';
 
 const initialState = {
   input: '',
@@ -101,7 +102,7 @@ class App extends Component {
 
   onRouteChange = (route) => {
     if (route == 'signout') {
-      this.setState(initialState);
+      return this.setState(initialState);
     } else if (route === 'home') {
       this.setState({ isSignedIn: true });
     }
