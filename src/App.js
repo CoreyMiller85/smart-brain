@@ -17,7 +17,7 @@ const initialState = {
   box: {},
   route: 'home',
   isSignedIn: true,
-  isProfileOpen: true,
+  isProfileOpen: false,
   user: {
     id: '',
     name: '',
