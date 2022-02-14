@@ -17,10 +17,15 @@ class Signin extends React.Component {
     this.setState({ signInPassword: event.target.value });
   };
 
+  saveAuthTokenInSessions = (token) => {
+    window.sessionStorage.setItem('token', token);
+  };
+
   onSubmitSignIn = () => {
     // fetch("https://afternoon-island-00813.herokuapp.com/signin", {
+
     fetch('http://localhost:3000/signin', {
-      method: 'POST',
+      method: 'post',
       headers: {
         'Content-Type': 'application/json',
       },
@@ -30,9 +35,10 @@ class Signin extends React.Component {
       }),
     })
       .then((response) => response.json())
-      .then((user) => {
-        if (user.id) {
-          this.props.loadUser(user);
+      .then((data) => {
+        if (data.userId && data.success === true) {
+          this.saveAuthTokenInSessions(data.token);
+          this.props.loadUser(data);
           this.props.onRouteChange('home');
         }
       });
