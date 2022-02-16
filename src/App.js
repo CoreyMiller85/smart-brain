@@ -48,7 +48,23 @@ class App extends Component {
         .then((response) => response.json())
         .then((data) => {
           if (data && data.id) {
-            console.log('Success, We need to get user profile');
+            console.log(data, 'data');
+            console.log(token, 'token');
+
+            fetch(`http://localhost:3000/profile/${data.id}`, {
+              method: 'get',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: token,
+              },
+            })
+              .then((response) => response.json())
+              .then((user) => {
+                if (user && user.email) {
+                  this.loadUser(user);
+                  this.onRouteChange('home');
+                }
+              });
           }
         })
         .catch(console.log);
@@ -68,17 +84,22 @@ class App extends Component {
   };
 
   calculateFaceLocation = (data) => {
-    const clarifaiFace =
-      data.outputs[0].data.regions[0].region_info.bounding_box;
-    const image = document.getElementById('inputimage');
-    const width = Number(image.width);
-    const height = Number(image.height);
-    return {
-      leftCol: clarifaiFace.left_col * width,
-      topRow: clarifaiFace.top_row * height,
-      rightCol: width - clarifaiFace.right_col * width,
-      bottomRow: height - clarifaiFace.bottom_row * height,
-    };
+    console.log('here');
+    console.log('data', data);
+    if (data && data.outputs) {
+      const image = document.getElementById('inputimage');
+      const width = Number(image.width);
+      const height = Number(image.height);
+      return data.outputs.map((face) => {
+        const clarifaiFace = face.data.regions[0].region_info.bounding_box;
+        return {
+          leftCol: clarifaiFace.left_col * width,
+          topRow: clarifaiFace.top_row * height,
+          rightCol: width - clarifaiFace.right_col * width,
+          bottomRow: height - clarifaiFace.bottom_row * height,
+        };
+      });
+    }
   };
 
   displayFaceBox = (box) => {
@@ -96,6 +117,7 @@ class App extends Component {
       method: 'post',
       headers: {
         'Content-Type': 'application/json',
+        Authorization: window.sessionStorage.getItem('token'),
       },
       body: JSON.stringify({
         input: this.state.input,
@@ -109,6 +131,7 @@ class App extends Component {
             method: 'put',
             headers: {
               'Content-Type': 'application/json',
+              Authorization: window.sessionStorage.getItem('token'),
             },
             body: JSON.stringify({
               id: this.state.user.id,
@@ -120,6 +143,7 @@ class App extends Component {
             })
             .catch(console.log);
         }
+        console.log(response, 'response');
         this.displayFaceBox(this.calculateFaceLocation(response));
       })
       .catch((err) => console.log(err));
