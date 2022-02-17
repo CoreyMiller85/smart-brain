@@ -14,7 +14,7 @@ import Profile from './components/Profile/Profile';
 const initialState = {
   input: '',
   imageUrl: '',
-  box: {},
+  boxes: [],
   route: 'signin',
   isSignedIn: false,
   isProfileOpen: false,
@@ -84,35 +84,30 @@ class App extends Component {
   };
 
   calculateFaceLocation = (data) => {
-    console.log('here');
-    console.log('data', data);
-    if (data && data.outputs) {
-      const image = document.getElementById('inputimage');
-      const width = Number(image.width);
-      const height = Number(image.height);
-      return data.outputs.map((face) => {
-        const clarifaiFace = face.data.regions[0].region_info.bounding_box;
-        return {
-          leftCol: clarifaiFace.left_col * width,
-          topRow: clarifaiFace.top_row * height,
-          rightCol: width - clarifaiFace.right_col * width,
-          bottomRow: height - clarifaiFace.bottom_row * height,
-        };
-      });
-    }
+    const image = document.getElementById('inputimage');
+    const width = Number(image.width);
+    const height = Number(image.height);
+    return data.outputs[0].data.regions.map((face) => {
+      const clarifaiFace = face.region_info.bounding_box;
+      return {
+        leftCol: clarifaiFace.left_col * width,
+        topRow: clarifaiFace.top_row * height,
+        rightCol: width - clarifaiFace.right_col * width,
+        bottomRow: height - clarifaiFace.bottom_row * height,
+      };
+    });
   };
-
-  displayFaceBox = (box) => {
-    this.setState({ box });
+  displayFaceBox = (boxes) => {
+    this.setState({ boxes: boxes });
+    console.log(boxes);
   };
 
   onInputChange = (event) => {
     this.setState({ input: event.target.value });
   };
 
-  onSubmit = () => {
+  onButtonSubmit = () => {
     this.setState({ imageUrl: this.state.input });
-    // fetch("https://afternoon-island-00813.herokuapp.com/imageurl", {
     fetch('http://localhost:3000/imageurl', {
       method: 'post',
       headers: {
@@ -126,7 +121,6 @@ class App extends Component {
       .then((response) => response.json())
       .then((response) => {
         if (response) {
-          // fetch('https://afternoon-island-00813.herokuapp.com/image', {
           fetch('http://localhost:3000/image', {
             method: 'put',
             headers: {
@@ -143,7 +137,6 @@ class App extends Component {
             })
             .catch(console.log);
         }
-        console.log(response, 'response');
         this.displayFaceBox(this.calculateFaceLocation(response));
       })
       .catch((err) => console.log(err));
@@ -284,9 +277,9 @@ class App extends Component {
             />
             <ImageLinkForm
               onInputChange={this.onInputChange}
-              onButtonSubmit={this.onSubmit}
+              onButtonSubmit={this.onButtonSubmit}
             />
-            <FaceRecognition imageUrl={imageUrl} box={box} />
+            <FaceRecognition imageUrl={imageUrl} boxes={this.state.boxes} />
           </div>
         ) : route === 'signin' ? (
           <Signin onRouteChange={this.onRouteChange} loadUser={this.loadUser} />
